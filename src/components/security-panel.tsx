@@ -102,7 +102,7 @@ export function SecurityArchitecturePanel({ wallet }: { wallet: Wallet }) {
       </div>
       <div>
         <h5 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Multi-Sig & Custody Matrix
+          Multi-Signature & Custody Matrix
         </h5>
         <MultiSigMatrix wallet={wallet} />
       </div>
