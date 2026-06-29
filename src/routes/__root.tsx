@@ -123,6 +123,26 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    function hideLovableBranding() {
+      const selectors = [
+        "#lovable-badge",
+        "[data-lovable-badge]",
+        "[data-lovable]",
+        ".lovable-badge",
+        'a[href*="lovable.dev"]',
+      ];
+      for (const selector of selectors) {
+        document.querySelectorAll(selector).forEach((el) => el.remove());
+      }
+    }
+
+    hideLovableBranding();
+    const observer = new MutationObserver(hideLovableBranding);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
