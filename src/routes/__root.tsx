@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../components/theme-provider";
+import { PremiumProvider } from "../components/premium-provider";
+import { PricingModal } from "../components/pricing-modal";
 
 function NotFoundComponent() {
   return (
@@ -120,8 +122,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        <PremiumProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <PricingModal />
+        </PremiumProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

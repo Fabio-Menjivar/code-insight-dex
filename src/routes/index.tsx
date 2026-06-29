@@ -1,12 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, Moon, Sun, Bitcoin, X } from "lucide-react";
+import { Search, Moon, Sun, Bitcoin, X, Sparkles, Building2, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/theme-provider";
 import { WalletCard } from "@/components/wallet-card";
 import { WalletDetail } from "@/components/wallet-detail";
+import { usePremium } from "@/components/premium-provider";
+import {
+  CorporateMatcher,
+  matchesCorporate,
+  type CorporateCriteria,
+} from "@/components/corporate-matcher";
 import {
   WALLETS,
   ALL_LANGUAGES,
@@ -86,6 +93,9 @@ function Index() {
   const [access, setAccess] = useState<CodeAccess[]>([]);
   const [selected, setSelected] = useState<Wallet | null>(null);
   const [open, setOpen] = useState(false);
+  const [matcherOpen, setMatcherOpen] = useState(false);
+  const [corporate, setCorporate] = useState<CorporateCriteria | null>(null);
+  const { isPremium, togglePremium, openPricing } = usePremium();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -99,17 +109,20 @@ function Index() {
       if (langs.length && !langs.some((l) => w.languages.some((wl) => wl.name === l))) return false;
       if (clients.length && !clients.some((c) => w.clients.includes(c))) return false;
       if (access.length && !access.includes(w.codeAccess)) return false;
+      if (corporate && !matchesCorporate(w, corporate)) return false;
       return true;
     });
-  }, [query, langs, clients, access]);
+  }, [query, langs, clients, access, corporate]);
 
-  const activeFilterCount = langs.length + clients.length + access.length + (query ? 1 : 0);
+  const activeFilterCount =
+    langs.length + clients.length + access.length + (query ? 1 : 0) + (corporate ? 1 : 0);
 
   function clearAll() {
     setQuery("");
     setLangs([]);
     setClients([]);
     setAccess([]);
+    setCorporate(null);
   }
 
   function openWallet(w: Wallet) {
@@ -139,6 +152,31 @@ function Index() {
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 sm:flex">
+              <ShieldCheck
+                className={`h-3.5 w-3.5 ${isPremium ? "text-bitcoin" : "text-muted-foreground"}`}
+              />
+              <span className="text-[11px] font-medium text-foreground">Premium</span>
+              <Switch checked={isPremium} onCheckedChange={togglePremium} aria-label="Premium user" />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMatcherOpen(true)}
+              className="hidden border-bitcoin/40 text-bitcoin hover:bg-bitcoin/10 sm:inline-flex"
+            >
+              <Building2 className="mr-1.5 h-4 w-4" /> Find Corporate Setup
+            </Button>
+            {!isPremium && (
+              <Button
+                size="sm"
+                onClick={openPricing}
+                className="text-primary-foreground hover:opacity-90"
+                style={{ background: "var(--gradient-bitcoin)" }}
+              >
+                <Sparkles className="mr-1.5 h-3.5 w-3.5" /> Upgrade
+              </Button>
+            )}
             <ThemeToggle />
           </div>
         </div>
@@ -178,12 +216,36 @@ function Index() {
                 className="h-11 pl-9"
               />
             </div>
+            <Button
+              variant="outline"
+              onClick={() => setMatcherOpen(true)}
+              className="h-11 border-bitcoin/40 text-bitcoin hover:bg-bitcoin/10 sm:hidden"
+            >
+              <Building2 className="mr-1.5 h-4 w-4" /> Corporate Setup
+            </Button>
             {activeFilterCount > 0 && (
               <Button variant="ghost" onClick={clearAll} className="h-11 shrink-0">
                 <X className="mr-1.5 h-4 w-4" /> Clear ({activeFilterCount})
               </Button>
             )}
           </div>
+
+          {corporate && (
+            <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-bitcoin/30 bg-bitcoin/5 p-3 text-xs">
+              <Building2 className="h-4 w-4 text-bitcoin" />
+              <span className="font-medium text-foreground">Corporate filter active:</span>
+              {corporate.multiSig && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">Multi-sig</Badge>}
+              {corporate.fullyOpen && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">No paid deps</Badge>}
+              {corporate.bip39 && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">BIP-39</Badge>}
+              <button
+                type="button"
+                onClick={() => setCorporate(null)}
+                className="ml-auto text-muted-foreground hover:text-foreground"
+              >
+                Remove
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -265,6 +327,11 @@ function Index() {
       </footer>
 
       <WalletDetail wallet={selected} open={open} onOpenChange={setOpen} />
+      <CorporateMatcher
+        open={matcherOpen}
+        onOpenChange={setMatcherOpen}
+        onApply={setCorporate}
+      />
     </div>
   );
 }
