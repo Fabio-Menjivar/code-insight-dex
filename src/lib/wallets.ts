@@ -23,6 +23,13 @@ export interface Wallet {
   pros: string[];
   cons: string[];
   tags: string[];
+  seedModel: string;
+  seedRisk: "Standard" | "Non-Standard" | "Proprietary";
+  multiSigType: string;
+  multiSigKind: "Native" | "Coordinator" | "Server-Dependent" | "None";
+  businessModel: string;
+  freeOffering: string;
+  paidOffering: string;
 }
 
 export const WALLETS: Wallet[] = [
