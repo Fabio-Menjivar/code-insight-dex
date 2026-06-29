@@ -69,34 +69,36 @@
 
 :root {
   --radius: 0.625rem;
-  /* Bitcoin-inspired palette: warm orange primary, off-white surfaces */
-  --background: oklch(0.985 0.005 80);
-  --foreground: oklch(0.18 0.02 60);
+  /* Coinlateral-inspired palette (light fallback) */
+  --background: oklch(0.985 0.005 286);
+  --foreground: oklch(0.18 0.01 286);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 60);
+  --card-foreground: oklch(0.18 0.01 286);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 60);
-  --primary: oklch(0.72 0.18 55);
-  --primary-foreground: oklch(0.99 0.005 80);
-  --secondary: oklch(0.95 0.01 80);
-  --secondary-foreground: oklch(0.22 0.02 60);
-  --muted: oklch(0.95 0.01 80);
-  --muted-foreground: oklch(0.48 0.02 60);
-  --accent: oklch(0.93 0.04 75);
-  --accent-foreground: oklch(0.22 0.02 60);
+  --popover-foreground: oklch(0.18 0.01 286);
+  --primary: oklch(0.735 0.168 55.5);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.95 0.005 286);
+  --secondary-foreground: oklch(0.22 0.01 286);
+  --muted: oklch(0.95 0.005 286);
+  --muted-foreground: oklch(0.55 0.01 286);
+  --accent: oklch(0.93 0.04 55);
+  --accent-foreground: oklch(0.22 0.01 286);
   --destructive: oklch(0.6 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.9 0.015 75);
-  --input: oklch(0.9 0.015 75);
-  --ring: oklch(0.72 0.18 55);
+  --border: oklch(0.9 0.005 286);
+  --input: oklch(0.9 0.005 286);
+  --ring: oklch(0.735 0.168 55.5);
   --success: oklch(0.65 0.16 150);
   --success-foreground: oklch(0.99 0 0);
   --warning: oklch(0.78 0.16 75);
   --warning-foreground: oklch(0.2 0.02 60);
-  --bitcoin: oklch(0.72 0.18 55);
-  --bitcoin-glow: oklch(0.82 0.16 65);
-  --gradient-bitcoin: linear-gradient(135deg, oklch(0.72 0.18 55), oklch(0.82 0.16 65));
-  --shadow-elegant: 0 10px 30px -10px color-mix(in oklab, oklch(0.72 0.18 55) 25%, transparent);
+  --bitcoin: oklch(0.735 0.168 55.5);
+  --bitcoin-glow: oklch(0.82 0.14 60);
+  --gradient-bitcoin: linear-gradient(135deg, oklch(0.735 0.168 55.5), oklch(0.82 0.14 60));
+  --shadow-elegant: 0 10px 30px -10px color-mix(in oklab, oklch(0.735 0.168 55.5) 25%, transparent);
+  --glass-card: oklch(0 0 0 / 3%);
+  --glass-border: oklch(1 0 0 / 10%);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -113,33 +115,36 @@
 }
 
 .dark {
-  --background: oklch(0.16 0.01 60);
-  --foreground: oklch(0.97 0.005 80);
-  --card: oklch(0.21 0.012 60);
-  --card-foreground: oklch(0.97 0.005 80);
-  --popover: oklch(0.21 0.012 60);
-  --popover-foreground: oklch(0.97 0.005 80);
-  --primary: oklch(0.76 0.17 60);
-  --primary-foreground: oklch(0.16 0.01 60);
-  --secondary: oklch(0.26 0.015 60);
-  --secondary-foreground: oklch(0.97 0.005 80);
-  --muted: oklch(0.26 0.015 60);
-  --muted-foreground: oklch(0.72 0.02 75);
-  --accent: oklch(0.32 0.05 65);
-  --accent-foreground: oklch(0.97 0.005 80);
+  /* Coinlateral premium dark: #09090B bg, #F7931A accent, glass cards */
+  --background: oklch(0.141 0.004 286);
+  --foreground: oklch(1 0 0);
+  --card: oklch(1 0 0 / 3%);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.18 0.004 286);
+  --popover-foreground: oklch(1 0 0);
+  --primary: oklch(0.735 0.168 55.5);
+  --primary-foreground: oklch(0.141 0.004 286);
+  --secondary: oklch(1 0 0 / 6%);
+  --secondary-foreground: oklch(1 0 0);
+  --muted: oklch(1 0 0 / 6%);
+  --muted-foreground: oklch(0.708 0.011 286.5);
+  --accent: oklch(0.735 0.168 55.5 / 12%);
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.68 0.2 25);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.76 0.17 60);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.735 0.168 55.5);
   --success: oklch(0.72 0.15 150);
-  --success-foreground: oklch(0.12 0.01 60);
+  --success-foreground: oklch(0.12 0.01 286);
   --warning: oklch(0.82 0.15 80);
-  --warning-foreground: oklch(0.16 0.01 60);
-  --bitcoin: oklch(0.78 0.17 62);
-  --bitcoin-glow: oklch(0.86 0.14 70);
-  --gradient-bitcoin: linear-gradient(135deg, oklch(0.72 0.18 55), oklch(0.84 0.15 70));
-  --shadow-elegant: 0 10px 40px -10px color-mix(in oklab, oklch(0.78 0.17 62) 35%, transparent);
+  --warning-foreground: oklch(0.141 0.004 286);
+  --bitcoin: oklch(0.735 0.168 55.5);
+  --bitcoin-glow: oklch(0.82 0.14 60);
+  --gradient-bitcoin: linear-gradient(135deg, oklch(0.735 0.168 55.5), oklch(0.82 0.14 60));
+  --shadow-elegant: 0 10px 40px -10px color-mix(in oklab, oklch(0.735 0.168 55.5) 35%, transparent);
+  --glass-card: oklch(1 0 0 / 3%);
+  --glass-border: oklch(1 0 0 / 10%);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -164,4 +169,31 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+
+  .dark .glass-card {
+    background: var(--glass-card);
+    border-color: var(--glass-border);
+    backdrop-filter: blur(12px);
+  }
+}
+
+/* Hide Lovable branding badge and editor overlays completely */
+#lovable-badge,
+[data-lovable-badge],
+[data-lovable],
+.lovable-badge,
+a[href*="lovable.dev"][target="_blank"],
+iframe[src*="lovable.app"],
+div[class*="lovable-badge"],
+div[id*="lovable-badge"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: fixed !important;
+  clip: rect(0, 0, 0, 0) !important;
+  z-index: -9999 !important;
 }
