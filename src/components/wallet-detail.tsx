@@ -2,6 +2,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { PremiumOverlay } from "@/components/premium-overlay";
+import { SecurityArchitecturePanel } from "@/components/security-panel";
 import {
   ShieldCheck,
   ShieldAlert,
@@ -232,6 +234,22 @@ export function WalletDetail({
             </Button>
           </>
         )}
+
+        <Separator className="my-5" />
+        <section>
+          <h4 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Security & Seed Architecture
+            <Badge
+              className="border-0 text-[10px] text-primary-foreground"
+              style={{ background: "var(--gradient-bitcoin)" }}
+            >
+              Enterprise
+            </Badge>
+          </h4>
+          <PremiumOverlay>
+            <SecurityArchitecturePanel wallet={wallet} />
+          </PremiumOverlay>
+        </section>
       </SheetContent>
     </Sheet>
   );
