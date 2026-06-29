@@ -91,6 +91,7 @@ function Index() {
   const [langs, setLangs] = useState<string[]>([]);
   const [clients, setClients] = useState<ClientType[]>([]);
   const [access, setAccess] = useState<CodeAccess[]>([]);
+  const [multiSigOnly, setMultiSigOnly] = useState(false);
   const [selected, setSelected] = useState<Wallet | null>(null);
   const [open, setOpen] = useState(false);
   const [matcherOpen, setMatcherOpen] = useState(false);
@@ -109,19 +110,26 @@ function Index() {
       if (langs.length && !langs.some((l) => w.languages.some((wl) => wl.name === l))) return false;
       if (clients.length && !clients.some((c) => w.clients.includes(c))) return false;
       if (access.length && !access.includes(w.codeAccess)) return false;
+      if (multiSigOnly && !w.isMultiSig) return false;
       if (corporate && !matchesCorporate(w, corporate)) return false;
       return true;
     });
-  }, [query, langs, clients, access, corporate]);
+  }, [query, langs, clients, access, multiSigOnly, corporate]);
 
   const activeFilterCount =
-    langs.length + clients.length + access.length + (query ? 1 : 0) + (corporate ? 1 : 0);
+    langs.length +
+    clients.length +
+    access.length +
+    (query ? 1 : 0) +
+    (corporate ? 1 : 0) +
+    (multiSigOnly ? 1 : 0);
 
   function clearAll() {
     setQuery("");
     setLangs([]);
     setClients([]);
     setAccess([]);
+    setMultiSigOnly(false);
     setCorporate(null);
   }
 
@@ -234,7 +242,7 @@ function Index() {
             <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-bitcoin/30 bg-bitcoin/5 p-3 text-xs">
               <Building2 className="h-4 w-4 text-bitcoin" />
               <span className="font-medium text-foreground">Corporate filter active:</span>
-              {corporate.multiSig && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">Multi-sig</Badge>}
+              {corporate.multiSig && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">Multi-Signature</Badge>}
               {corporate.fullyOpen && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">No paid deps</Badge>}
               {corporate.bip39 && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">BIP-39</Badge>}
               <button
@@ -254,6 +262,17 @@ function Index() {
         {/* Sidebar Filters */}
         <aside className="mb-8 lg:mb-0">
           <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-2">
+            <FilterGroup title="Multi-Signature & Protocols">
+              <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 px-3 py-2.5 backdrop-blur-sm">
+                <span className="text-xs font-medium text-foreground">Multi-Signature Only</span>
+                <Switch
+                  checked={multiSigOnly}
+                  onCheckedChange={setMultiSigOnly}
+                  aria-label="Show multi-signature wallets only"
+                />
+              </label>
+            </FilterGroup>
+
             <FilterGroup title="Client Type">
               <div className="flex flex-wrap gap-1.5">
                 {ALL_CLIENTS.map((c) => (
