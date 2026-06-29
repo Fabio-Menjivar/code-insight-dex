@@ -16,7 +16,7 @@ export function WalletCard({ wallet, onSelect }: { wallet: Wallet; onSelect: () 
   return (
     <Card
       onClick={onSelect}
-      className="group cursor-pointer overflow-hidden border-border/60 bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-bitcoin/60 hover:shadow-[var(--shadow-elegant)]"
+      className="glass-card group cursor-pointer overflow-hidden border-border/60 bg-card p-5 backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-bitcoin/60 hover:shadow-[var(--shadow-elegant)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -48,9 +48,16 @@ export function WalletCard({ wallet, onSelect }: { wallet: Wallet; onSelect: () 
       <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{wallet.tagline}</p>
 
       <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-medium text-foreground">{primary.name}</span>
-          <span className="text-muted-foreground">{primary.percent}%</span>
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="truncate font-medium text-foreground">{primary.name}</span>
+            {wallet.isMultiSig && (
+              <span className="shrink-0 rounded-full border border-bitcoin/30 bg-bitcoin/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-bitcoin">
+                Multi-Signature
+              </span>
+            )}
+          </div>
+          <span className="shrink-0 text-muted-foreground">{primary.percent}%</span>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
