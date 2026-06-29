@@ -8,6 +8,11 @@ export interface LanguageSlice {
   percent: number;
 }
 
+export interface VulnerabilityStats {
+  totalIncidents: number;
+  description: string;
+}
+
 export interface Wallet {
   id: string;
   name: string;
@@ -27,6 +32,8 @@ export interface Wallet {
   seedRisk: "Standard" | "Non-Standard" | "Proprietary";
   multiSigType: string;
   multiSigKind: "Native" | "Coordinator" | "Server-Dependent" | "None";
+  isMultiSig: boolean;
+  vulnerabilityStats: VulnerabilityStats;
   businessModel: string;
   freeOffering: string;
   paidOffering: string;
@@ -60,6 +67,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Standard",
     multiSigType: "Coordinator Only (CoinJoin)",
     multiSigKind: "Coordinator",
+    isMultiSig: false,
+    vulnerabilityStats: {
+      totalIncidents: 2,
+      description:
+        "Historically low CVE count; minor UI/CoinJoin routing disclosures, patched promptly.",
+    },
     businessModel: "Free Client / Paid Coordinator Fees",
     freeOffering: "Full wallet, CoinJoin participation, hardware wallet support",
     paidOffering: "WabiSabi coordinator fees per CoinJoin round",
@@ -92,6 +105,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Non-Standard",
     multiSigType: "Native via descriptors & PSBT",
     multiSigKind: "Native",
+    isMultiSig: true,
+    vulnerabilityStats: {
+      totalIncidents: 35,
+      description:
+        "Includes ~35 historical CVEs since 2012 (mostly DoS vectors like CVE-2024-52914 or resource consumption limits). Quick patch history.",
+    },
     businessModel: "100% FOSS",
     freeOffering: "Full node, validation, wallet, RPC API",
     paidOffering: "None — community maintained",
@@ -124,6 +143,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Standard",
     multiSigType: "Native 2-of-3 vaults",
     multiSigKind: "Native",
+    isMultiSig: true,
+    vulnerabilityStats: {
+      totalIncidents: 3,
+      description:
+        "A handful of dependency advisories in the React Native stack; LndHub custodial mode has had disclosure notices around server trust assumptions.",
+    },
     businessModel: "Free Client / Paid Node Infrastructure",
     freeOffering: "On-chain wallet, vaults, custodial LNDHub default",
     paidOffering: "LNDHub hosting and dedicated Electrum endpoints",
@@ -155,6 +180,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Standard",
     multiSigType: "None (single-sig Lightning)",
     multiSigKind: "None",
+    isMultiSig: false,
+    vulnerabilityStats: {
+      totalIncidents: 0,
+      description:
+        "No published CVEs tied to Phoenix itself; ACINQ maintains a responsive disclosure program for the Lightning stack.",
+    },
     businessModel: "Free Client / Paid LSP Fees",
     freeOffering: "Lightning wallet with splicing and trampoline",
     paidOffering: "Liquidity and channel splicing fees to ACINQ LSP",
@@ -186,6 +217,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Standard",
     multiSigType: "Native arbitrary M-of-N",
     multiSigKind: "Native",
+    isMultiSig: true,
+    vulnerabilityStats: {
+      totalIncidents: 1,
+      description:
+        "One minor PSBT parsing edge case disclosed and patched in 2022; otherwise strong track record for a power-user tool.",
+    },
     businessModel: "100% FOSS (donations)",
     freeOffering: "Full desktop wallet, hardware coordinator, PSBT, miniscript",
     paidOffering: "None — donation supported",
@@ -217,6 +254,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Non-Standard",
     multiSigType: "Native M-of-N",
     multiSigKind: "Native",
+    isMultiSig: true,
+    vulnerabilityStats: {
+      totalIncidents: 4,
+      description:
+        "Notable incidents include the 2018 JSONRPC Missing Authorization (CVE-2018-1000022) and the massive 2019 Sybil/Phishing server attack.",
+    },
     businessModel: "100% FOSS",
     freeOffering: "SPV wallet, plugins, hardware integrations",
     paidOffering: "None",
@@ -249,6 +292,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Proprietary",
     multiSigType: "2-of-2 with Muun server (server-dependent)",
     multiSigKind: "Server-Dependent",
+    isMultiSig: true,
+    vulnerabilityStats: {
+      totalIncidents: 1,
+      description:
+        "Uses a custom 2-of-2 multi-sig. No major core breaches, but criticized for high fee environment edge cases.",
+    },
     businessModel: "Free Client / Server-Dependent",
     freeOffering: "Mobile wallet, submarine swaps, Emergency Kit",
     paidOffering: "On-chain fees for swaps; server co-signer is mandatory",
@@ -280,6 +329,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Standard",
     multiSigType: "None natively (via 3rd-party coordinators)",
     multiSigKind: "None",
+    isMultiSig: false,
+    vulnerabilityStats: {
+      totalIncidents: 6,
+      description:
+        "Several library and ConnectKit-related advisories; secure-element firmware remains closed-source, limiting independent CVE tracking.",
+    },
     businessModel: "Commercial / Proprietary firmware",
     freeOffering: "Ledger Live app, basic asset management",
     paidOffering: "Ledger hardware devices, Ledger Recover subscription, Ledger Enterprise",
@@ -312,6 +367,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Standard",
     multiSigType: "None natively (Snaps / Safe integrations)",
     multiSigKind: "None",
+    isMultiSig: false,
+    vulnerabilityStats: {
+      totalIncidents: 8,
+      description:
+        "Browser extension attack surface has produced multiple advisories; Infura RPC defaults and dApp phishing remain the primary user-facing risks.",
+    },
     businessModel: "Free Client / Paid Infrastructure (Infura, Swaps)",
     freeOffering: "EVM wallet, dApp connector, Snaps",
     paidOffering: "Swap fees, Infura API tiers, MetaMask Institutional",
@@ -343,6 +404,12 @@ export const WALLETS: Wallet[] = [
     seedRisk: "Standard",
     multiSigType: "Coordinator-based via Electrum/Sparrow",
     multiSigKind: "Coordinator",
+    isMultiSig: false,
+    vulnerabilityStats: {
+      totalIncidents: 2,
+      description:
+        "Trezor firmware has a strong disclosure record; Suite has had minor UI and CoinJoin integration issues, all patched quickly.",
+    },
     businessModel: "Commercial Hardware / FOSS Software",
     freeOffering: "Trezor Suite app, firmware source, basic features",
     paidOffering: "Trezor hardware devices, CoinJoin coordinator fees",
