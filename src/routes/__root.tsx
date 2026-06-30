@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../components/theme-provider";
-import { PremiumProvider } from "../components/premium-provider";
+import { AuthProvider } from "../components/auth-provider";
 import { PricingModal } from "../components/pricing-modal";
 
 function NotFoundComponent() {
@@ -80,20 +80,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Crypto Clarity is an interactive directory and tracker for cryptocurrency wallets, analyzing their programming languages, architecture, and security." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Crypto Clarity is an interactive directory and tracker for cryptocurrency wallets, analyzing their programming languages, architecture, and security." },
+      { title: "Fraktur — AI-Powered Security for Bitcoin Companies" },
+      {
+        name: "description",
+        content:
+          "Fraktur helps Bitcoin companies compare wallet architecture, custody models, protocols, and historical vulnerability track records.",
+      },
+      { name: "author", content: "Fraktur" },
+      { property: "og:title", content: "Fraktur — AI-Powered Security for Bitcoin Companies" },
+      {
+        property: "og:description",
+        content:
+          "Compare wallets, exchanges, multi-signature support, and security track records in one directory.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Crypto Clarity is an interactive directory and tracker for cryptocurrency wallets, analyzing their programming languages, architecture, and security." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dab66d55-6980-4593-80ed-90de36612e6a/id-preview-d7754506--cb27e19f-ce97-4403-91b0-74f8552ab6b4.lovable.app-1782770711494.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dab66d55-6980-4593-80ed-90de36612e6a/id-preview-d7754506--cb27e19f-ce97-4403-91b0-74f8552ab6b4.lovable.app-1782770711494.png" },
+      { name: "twitter:title", content: "Fraktur — AI-Powered Security for Bitcoin Companies" },
+      {
+        name: "twitter:description",
+        content:
+          "Compare wallets, exchanges, multi-signature support, and security track records in one directory.",
+      },
     ],
     links: [
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       {
         rel: "stylesheet",
         href: appCss,
@@ -108,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
@@ -146,11 +156,10 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <PremiumProvider>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <AuthProvider>
           <Outlet />
           <PricingModal />
-        </PremiumProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

@@ -2,6 +2,13 @@ export type Custody = "Self-custodial" | "Custodial";
 export type CodeAccess = "Open Source" | "Closed Source" | "Shared Source";
 export type Reproducibility = "Reproducible" | "Not Reproducible" | "Unverifiable";
 export type ClientType = "Mobile" | "Desktop" | "Hardware" | "Browser Extension";
+export type WalletKind = "Wallet" | "Exchange";
+export type ProtocolTag = "Lightning" | "On-chain" | "EVM" | "CoinJoin" | "Multi-chain";
+export type Region = "Global" | "US" | "EU" | "Asia";
+
+export function walletLogo(domain: string): string {
+  return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+}
 
 export interface LanguageSlice {
   name: string;
@@ -34,6 +41,11 @@ export interface Wallet {
   multiSigKind: "Native" | "Coordinator" | "Server-Dependent" | "None";
   isMultiSig: boolean;
   vulnerabilityStats: VulnerabilityStats;
+  logoUrl: string;
+  kind: WalletKind;
+  protocols: ProtocolTag[];
+  isBitcoinOnly: boolean;
+  region: Region;
   businessModel: string;
   freeOffering: string;
   paidOffering: string;
@@ -73,6 +85,11 @@ export const WALLETS: Wallet[] = [
       description:
         "Historically low CVE count; minor UI/CoinJoin routing disclosures, patched promptly.",
     },
+    logoUrl: walletLogo("walletwasabi.io"),
+    kind: "Wallet",
+    protocols: ["On-chain", "CoinJoin"],
+    isBitcoinOnly: true,
+    region: "Global",
     businessModel: "Free Client / Paid Coordinator Fees",
     freeOffering: "Full wallet, CoinJoin participation, hardware wallet support",
     paidOffering: "WabiSabi coordinator fees per CoinJoin round",
@@ -111,6 +128,11 @@ export const WALLETS: Wallet[] = [
       description:
         "Includes ~35 historical CVEs since 2012 (mostly DoS vectors like CVE-2024-52914 or resource consumption limits). Quick patch history.",
     },
+    logoUrl: walletLogo("bitcoin.org"),
+    kind: "Wallet",
+    protocols: ["On-chain"],
+    isBitcoinOnly: true,
+    region: "Global",
     businessModel: "100% FOSS",
     freeOffering: "Full node, validation, wallet, RPC API",
     paidOffering: "None — community maintained",
@@ -149,6 +171,11 @@ export const WALLETS: Wallet[] = [
       description:
         "A handful of dependency advisories in the React Native stack; LndHub custodial mode has had disclosure notices around server trust assumptions.",
     },
+    logoUrl: walletLogo("bluewallet.io"),
+    kind: "Wallet",
+    protocols: ["On-chain", "Lightning", "Multi-chain"],
+    isBitcoinOnly: false,
+    region: "Global",
     businessModel: "Free Client / Paid Node Infrastructure",
     freeOffering: "On-chain wallet, vaults, custodial LNDHub default",
     paidOffering: "LNDHub hosting and dedicated Electrum endpoints",
@@ -186,6 +213,11 @@ export const WALLETS: Wallet[] = [
       description:
         "No published CVEs tied to Phoenix itself; ACINQ maintains a responsive disclosure program for the Lightning stack.",
     },
+    logoUrl: walletLogo("phoenix.acinq.co"),
+    kind: "Wallet",
+    protocols: ["Lightning", "On-chain"],
+    isBitcoinOnly: true,
+    region: "EU",
     businessModel: "Free Client / Paid LSP Fees",
     freeOffering: "Lightning wallet with splicing and trampoline",
     paidOffering: "Liquidity and channel splicing fees to ACINQ LSP",
@@ -223,6 +255,11 @@ export const WALLETS: Wallet[] = [
       description:
         "One minor PSBT parsing edge case disclosed and patched in 2022; otherwise strong track record for a power-user tool.",
     },
+    logoUrl: walletLogo("sparrowwallet.com"),
+    kind: "Wallet",
+    protocols: ["On-chain"],
+    isBitcoinOnly: true,
+    region: "Global",
     businessModel: "100% FOSS (donations)",
     freeOffering: "Full desktop wallet, hardware coordinator, PSBT, miniscript",
     paidOffering: "None — donation supported",
@@ -260,6 +297,11 @@ export const WALLETS: Wallet[] = [
       description:
         "Notable incidents include the 2018 JSONRPC Missing Authorization (CVE-2018-1000022) and the massive 2019 Sybil/Phishing server attack.",
     },
+    logoUrl: walletLogo("electrum.org"),
+    kind: "Wallet",
+    protocols: ["On-chain", "Lightning"],
+    isBitcoinOnly: true,
+    region: "Global",
     businessModel: "100% FOSS",
     freeOffering: "SPV wallet, plugins, hardware integrations",
     paidOffering: "None",
@@ -298,6 +340,11 @@ export const WALLETS: Wallet[] = [
       description:
         "Uses a custom 2-of-2 multi-sig. No major core breaches, but criticized for high fee environment edge cases.",
     },
+    logoUrl: walletLogo("muun.com"),
+    kind: "Wallet",
+    protocols: ["Lightning", "On-chain"],
+    isBitcoinOnly: true,
+    region: "Global",
     businessModel: "Free Client / Server-Dependent",
     freeOffering: "Mobile wallet, submarine swaps, Emergency Kit",
     paidOffering: "On-chain fees for swaps; server co-signer is mandatory",
@@ -335,47 +382,14 @@ export const WALLETS: Wallet[] = [
       description:
         "Several library and ConnectKit-related advisories; secure-element firmware remains closed-source, limiting independent CVE tracking.",
     },
+    logoUrl: walletLogo("ledger.com"),
+    kind: "Wallet",
+    protocols: ["Multi-chain", "On-chain", "EVM"],
+    isBitcoinOnly: false,
+    region: "EU",
     businessModel: "Commercial / Proprietary firmware",
     freeOffering: "Ledger Live app, basic asset management",
     paidOffering: "Ledger hardware devices, Ledger Recover subscription, Ledger Enterprise",
-  },
-  {
-    id: "metamask",
-    name: "MetaMask",
-    company: "ConsenSys",
-    tagline: "Browser extension wallet for EVM ecosystems.",
-    clients: ["Browser Extension", "Mobile"],
-    languages: [
-      { name: "TypeScript", percent: 60 },
-      { name: "JavaScript", percent: 32 },
-      { name: "Swift", percent: 4 },
-      { name: "Kotlin", percent: 4 },
-    ],
-    custody: "Self-custodial",
-    codeAccess: "Open Source",
-    reproducibility: "Not Reproducible",
-    repoUrl: "https://github.com/MetaMask/metamask-extension",
-    characteristics: [
-      "EIP-1193 provider for dApps",
-      "Infura RPC by default",
-      "Snaps plugin system",
-    ],
-    pros: ["dApp standard", "Snaps extensibility", "Hardware wallet support"],
-    cons: ["Default RPC sees all activity", "Large attack surface in browser"],
-    tags: ["EVM", "Extension", "dApps"],
-      seedModel: "Standard BIP-39 (12 words)",
-    seedRisk: "Standard",
-    multiSigType: "None natively (Snaps / Safe integrations)",
-    multiSigKind: "None",
-    isMultiSig: false,
-    vulnerabilityStats: {
-      totalIncidents: 8,
-      description:
-        "Browser extension attack surface has produced multiple advisories; Infura RPC defaults and dApp phishing remain the primary user-facing risks.",
-    },
-    businessModel: "Free Client / Paid Infrastructure (Infura, Swaps)",
-    freeOffering: "EVM wallet, dApp connector, Snaps",
-    paidOffering: "Swap fees, Infura API tiers, MetaMask Institutional",
   },
   {
     id: "trezor-suite",
@@ -410,9 +424,98 @@ export const WALLETS: Wallet[] = [
       description:
         "Trezor firmware has a strong disclosure record; Suite has had minor UI and CoinJoin integration issues, all patched quickly.",
     },
+    logoUrl: walletLogo("trezor.io"),
+    kind: "Wallet",
+    protocols: ["On-chain", "Multi-chain", "CoinJoin"],
+    isBitcoinOnly: false,
+    region: "EU",
     businessModel: "Commercial Hardware / FOSS Software",
     freeOffering: "Trezor Suite app, firmware source, basic features",
     paidOffering: "Trezor hardware devices, CoinJoin coordinator fees",
+  },
+  {
+    id: "coinbase",
+    name: "Coinbase",
+    company: "Coinbase Inc.",
+    tagline: "US-regulated exchange with custodial Bitcoin and altcoin trading.",
+    clients: ["Mobile", "Desktop", "Browser Extension"],
+    languages: [
+      { name: "TypeScript", percent: 55 },
+      { name: "Go", percent: 25 },
+      { name: "Ruby", percent: 12 },
+      { name: "Python", percent: 8 },
+    ],
+    custody: "Custodial",
+    codeAccess: "Closed Source",
+    reproducibility: "Unverifiable",
+    characteristics: [
+      "Licensed US exchange and custody",
+      "Insurance on USD balances",
+      "Retail and institutional API tiers",
+    ],
+    pros: ["Regulatory clarity in the US", "High liquidity", "Beginner-friendly UX"],
+    cons: ["Not self-custodial", "Account freezes possible", "Closed-source stack"],
+    tags: ["Exchange", "Custodial", "US"],
+    seedModel: "Exchange account (no user-held seed)",
+    seedRisk: "Proprietary",
+    multiSigType: "None (custodial exchange)",
+    multiSigKind: "None",
+    isMultiSig: false,
+    vulnerabilityStats: {
+      totalIncidents: 5,
+      description:
+        "Exchange-level incidents include API key leaks and social-engineering campaigns; funds held in custodial pools, not user wallets.",
+    },
+    logoUrl: walletLogo("coinbase.com"),
+    kind: "Exchange",
+    protocols: ["Multi-chain", "EVM", "On-chain"],
+    isBitcoinOnly: false,
+    region: "US",
+    businessModel: "Commercial Exchange / Custody",
+    freeOffering: "Retail trading, mobile app, basic custody",
+    paidOffering: "Coinbase Advanced, Prime, and institutional custody fees",
+  },
+  {
+    id: "binance",
+    name: "Binance",
+    company: "Binance Holdings",
+    tagline: "Global exchange with deep liquidity across hundreds of trading pairs.",
+    clients: ["Mobile", "Desktop", "Browser Extension"],
+    languages: [
+      { name: "Java", percent: 40 },
+      { name: "TypeScript", percent: 35 },
+      { name: "Python", percent: 15 },
+      { name: "Go", percent: 10 },
+    ],
+    custody: "Custodial",
+    codeAccess: "Closed Source",
+    reproducibility: "Unverifiable",
+    characteristics: [
+      "Global spot and derivatives markets",
+      "Proof-of-reserves snapshots published periodically",
+      "BNB Chain ecosystem integration",
+    ],
+    pros: ["Very deep liquidity", "Wide asset coverage", "Low trading fees"],
+    cons: ["Fully custodial", "Regulatory scrutiny in multiple regions", "Closed source"],
+    tags: ["Exchange", "Custodial", "Global"],
+    seedModel: "Exchange account (no user-held seed)",
+    seedRisk: "Proprietary",
+    multiSigType: "None (custodial exchange)",
+    multiSigKind: "None",
+    isMultiSig: false,
+    vulnerabilityStats: {
+      totalIncidents: 7,
+      description:
+        "Notable exchange hacks and API abuse campaigns; user funds depend on platform security and internal controls.",
+    },
+    logoUrl: walletLogo("binance.com"),
+    kind: "Exchange",
+    protocols: ["Multi-chain", "EVM", "On-chain"],
+    isBitcoinOnly: false,
+    region: "Asia",
+    businessModel: "Commercial Exchange / Custody",
+    freeOffering: "Spot trading, earn products, mobile app",
+    paidOffering: "Futures, VIP fee tiers, and BNB Chain services",
   },
 ];
 
@@ -422,3 +525,7 @@ export const ALL_LANGUAGES = Array.from(
 
 export const ALL_CLIENTS: ClientType[] = ["Mobile", "Desktop", "Hardware", "Browser Extension"];
 export const ALL_CODE_ACCESS: CodeAccess[] = ["Open Source", "Closed Source", "Shared Source"];
+export const ALL_PROTOCOLS: ProtocolTag[] = ["Lightning", "On-chain", "EVM", "CoinJoin", "Multi-chain"];
+export const ALL_REGIONS: Region[] = ["Global", "US", "EU", "Asia"];
+export const ALL_KINDS: WalletKind[] = ["Wallet", "Exchange"];
+export const ALL_CUSTODY: Custody[] = ["Self-custodial", "Custodial"];

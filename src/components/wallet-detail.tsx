@@ -19,6 +19,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import type { Wallet } from "@/lib/wallets";
+import { WalletLogo } from "@/components/wallet-logo";
 
 const LANG_COLORS = [
   "var(--bitcoin)",
@@ -122,6 +123,35 @@ function OverviewTab({ wallet }: { wallet: Wallet }) {
 
   return (
     <div className="space-y-5">
+      <section className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-success">
+            <Check className="h-3.5 w-3.5" /> Pros
+          </h4>
+          <ul className="mt-2 space-y-1.5 text-sm">
+            {wallet.pros.map((p) => (
+              <li key={p} className="text-foreground/90">
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-destructive">
+            <X className="h-3.5 w-3.5" /> Cons
+          </h4>
+          <ul className="mt-2 space-y-1.5 text-sm">
+            {wallet.cons.map((p) => (
+              <li key={p} className="text-foreground/90">
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <Separator className="bg-border/60" />
+
       <section>
         <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Security & Scrutiny
@@ -207,35 +237,6 @@ function OverviewTab({ wallet }: { wallet: Wallet }) {
         </ul>
       </section>
 
-      <Separator className="bg-border/60" />
-
-      <section className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-success">
-            <Check className="h-3.5 w-3.5" /> Pros
-          </h4>
-          <ul className="mt-2 space-y-1.5 text-sm">
-            {wallet.pros.map((p) => (
-              <li key={p} className="text-foreground/90">
-                {p}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-destructive">
-            <X className="h-3.5 w-3.5" /> Cons
-          </h4>
-          <ul className="mt-2 space-y-1.5 text-sm">
-            {wallet.cons.map((p) => (
-              <li key={p} className="text-foreground/90">
-                {p}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
       {wallet.repoUrl && (
         <>
           <Separator className="bg-border/60" />
@@ -270,12 +271,7 @@ export function WalletDetail({
       >
         <SheetHeader className="space-y-3">
           <div className="flex items-start gap-3">
-            <div
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-lg font-bold text-primary-foreground"
-              style={{ background: "var(--gradient-bitcoin)" }}
-            >
-              {wallet.name.charAt(0)}
-            </div>
+            <WalletLogo wallet={wallet} size="lg" />
             <div className="min-w-0 flex-1">
               <SheetTitle className="truncate text-xl">{wallet.name}</SheetTitle>
               <SheetDescription className="truncate">{wallet.company}</SheetDescription>

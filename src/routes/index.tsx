@@ -1,179 +1,157 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, Moon, Sun, Bitcoin, X, Sparkles, Building2, ShieldCheck } from "lucide-react";
+import {
+  Search,
+  Shield,
+  Sparkles,
+  Wallet as WalletIcon,
+  ShieldCheck,
+  LogOut,
+  User,
+  X,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { useTheme } from "@/components/theme-provider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { WalletCard } from "@/components/wallet-card";
 import { WalletDetail } from "@/components/wallet-detail";
-import { usePremium } from "@/components/premium-provider";
+import { useAuth } from "@/components/auth-provider";
 import {
-  CorporateMatcher,
-  matchesCorporate,
-  type CorporateCriteria,
-} from "@/components/corporate-matcher";
+  WalletFinder,
+  matchesWalletFinder,
+  type WalletFinderCriteria,
+} from "@/components/wallet-finder";
 import {
   WALLETS,
-  ALL_LANGUAGES,
   ALL_CLIENTS,
-  ALL_CODE_ACCESS,
+  ALL_REGIONS,
   type Wallet,
   type ClientType,
-  type CodeAccess,
+  type Region,
+  type WalletKind,
+  type Custody,
 } from "@/lib/wallets";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "WalletStack — Crypto Wallet Architecture Tracker" },
+      { title: "Fraktur — AI-Powered Security for Bitcoin Companies" },
       {
         name: "description",
         content:
-          "Inspect the programming languages, security profile and reproducibility of popular Bitcoin and crypto wallets.",
+          "Compare wallet architecture, custody, protocols, and vulnerability track records for Bitcoin companies.",
       },
-      { property: "og:title", content: "WalletStack — Crypto Wallet Architecture Tracker" },
+      { property: "og:title", content: "Fraktur — AI-Powered Security for Bitcoin Companies" },
       {
         property: "og:description",
-        content: "Languages, custody and scrutiny status for the wallets you actually use.",
+        content: "Wallet & exchange directory with multi-signature, protocol, and security filters.",
       },
     ],
   }),
   component: Index,
 });
 
-function ThemeToggle() {
-  const { theme, toggle } = useTheme();
-  return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={toggle}
-      aria-label="Toggle theme"
-      className="shrink-0"
-    >
-      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </Button>
-  );
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
-        active
-          ? "border-bitcoin bg-bitcoin text-primary-foreground shadow-[var(--shadow-elegant)]"
-          : "border-border bg-card text-foreground/80 hover:border-bitcoin/60 hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function toggle<T>(arr: T[], v: T): T[] {
-  return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
-}
+type TypeFilter = "all" | WalletKind | Custody;
 
 function Index() {
   const [query, setQuery] = useState("");
-  const [langs, setLangs] = useState<string[]>([]);
-  const [clients, setClients] = useState<ClientType[]>([]);
-  const [access, setAccess] = useState<CodeAccess[]>([]);
-  const [multiSigOnly, setMultiSigOnly] = useState(false);
+  const [region, setRegion] = useState<Region | "all">("all");
+  const [type, setType] = useState<TypeFilter>("all");
+  const [platform, setPlatform] = useState<ClientType | "all">("all");
   const [selected, setSelected] = useState<Wallet | null>(null);
   const [open, setOpen] = useState(false);
-  const [matcherOpen, setMatcherOpen] = useState(false);
-  const [corporate, setCorporate] = useState<CorporateCriteria | null>(null);
-  const { isPremium, togglePremium, openPricing } = usePremium();
+  const [finderOpen, setFinderOpen] = useState(false);
+  const [finderCriteria, setFinderCriteria] = useState<WalletFinderCriteria | null>(null);
+  const { isPremium, openPricing, isAuthenticated, user, logout } = useAuth();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return WALLETS.filter((w) => {
       if (q) {
-        const hay = `${w.name} ${w.company} ${w.tagline} ${w.tags.join(" ")} ${w.languages
-          .map((l) => l.name)
-          .join(" ")}`.toLowerCase();
+        const hay = `${w.name} ${w.company} ${w.tagline} ${w.tags.join(" ")}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
-      if (langs.length && !langs.some((l) => w.languages.some((wl) => wl.name === l))) return false;
-      if (clients.length && !clients.some((c) => w.clients.includes(c))) return false;
-      if (access.length && !access.includes(w.codeAccess)) return false;
-      if (multiSigOnly && !w.isMultiSig) return false;
-      if (corporate && !matchesCorporate(w, corporate)) return false;
+      if (region !== "all" && w.region !== region) return false;
+      if (type === "Wallet" || type === "Exchange") {
+        if (w.kind !== type) return false;
+      } else if (type === "Self-custodial" || type === "Custodial") {
+        if (w.custody !== type) return false;
+      }
+      if (platform !== "all" && !w.clients.includes(platform)) return false;
+      if (finderCriteria && !matchesWalletFinder(w, finderCriteria)) return false;
       return true;
     });
-  }, [query, langs, clients, access, multiSigOnly, corporate]);
+  }, [query, region, type, platform, finderCriteria]);
 
-  const activeFilterCount =
-    langs.length +
-    clients.length +
-    access.length +
-    (query ? 1 : 0) +
-    (corporate ? 1 : 0) +
-    (multiSigOnly ? 1 : 0);
+  const hasFilters =
+    query.trim() !== "" || region !== "all" || type !== "all" || platform !== "all" || finderCriteria;
 
-  function clearAll() {
+  function clearFilters() {
     setQuery("");
-    setLangs([]);
-    setClients([]);
-    setAccess([]);
-    setMultiSigOnly(false);
-    setCorporate(null);
-  }
-
-  function openWallet(w: Wallet) {
-    setSelected(w);
-    setOpen(true);
+    setRegion("all");
+    setType("all");
+    setPlatform("all");
+    setFinderCriteria(null);
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 sm:flex sm:px-6">
+      <header className="sticky top-0 z-30 border-b border-white/15 bg-background/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
-            <div
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-primary-foreground"
-              style={{ background: "var(--gradient-bitcoin)" }}
-            >
-              <Bitcoin className="h-5 w-5" />
-            </div>
+            <img src="/favicon.svg" alt="Fraktur" className="h-10 w-10 shrink-0 rounded-xl" />
             <div className="min-w-0">
-              <h1 className="truncate text-base font-bold tracking-tight sm:text-lg">
-                WalletStack
+              <h1 className="truncate text-base font-bold tracking-tight text-white sm:text-lg">
+                Fraktur
               </h1>
               <p className="truncate text-xs text-muted-foreground">
-                Architecture & scrutiny tracker
+                AI-Powered Security for Bitcoin Companies
               </p>
             </div>
           </div>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 sm:flex">
-              <ShieldCheck
-                className={`h-3.5 w-3.5 ${isPremium ? "text-bitcoin" : "text-muted-foreground"}`}
-              />
-              <span className="text-[11px] font-medium text-foreground">Premium</span>
-              <Switch checked={isPremium} onCheckedChange={togglePremium} aria-label="Premium user" />
-            </div>
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            {isAuthenticated ? (
+              <>
+                <div className="hidden items-center gap-2 rounded-full border border-white/15 bg-card px-3 py-1.5 sm:flex">
+                  <User className="h-3.5 w-3.5 text-bitcoin" />
+                  <span className="max-w-[120px] truncate text-[11px] font-medium">{user?.name}</span>
+                  {isPremium && (
+                    <Badge className="border-0 bg-bitcoin/20 text-[10px] text-bitcoin">Enterprise</Badge>
+                  )}
+                </div>
+                <Button variant="ghost" size="sm" onClick={logout} className="text-muted-foreground">
+                  <LogOut className="mr-1.5 h-4 w-4" /> Sign out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild variant="outline" size="sm" className="border-white/15">
+                  <Link to="/login">Sign in</Link>
+                </Button>
+                <Button
+                  asChild
+                  size="sm"
+                  className="text-primary-foreground"
+                  style={{ background: "var(--gradient-bitcoin)" }}
+                >
+                  <Link to="/register">Register</Link>
+                </Button>
+              </>
+            )}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setMatcherOpen(true)}
+              onClick={() => setFinderOpen(true)}
               className="hidden border-bitcoin/40 text-bitcoin hover:bg-bitcoin/10 sm:inline-flex"
             >
-              <Building2 className="mr-1.5 h-4 w-4" /> Find Corporate Setup
+              <WalletIcon className="mr-1.5 h-4 w-4" /> Find your wallet
             </Button>
             {!isPremium && (
               <Button
@@ -185,183 +163,158 @@ function Index() {
                 <Sparkles className="mr-1.5 h-3.5 w-3.5" /> Upgrade
               </Button>
             )}
-            <ThemeToggle />
+            {isPremium && (
+              <div className="hidden items-center gap-1.5 rounded-full border border-bitcoin/30 bg-bitcoin/10 px-3 py-1.5 sm:flex">
+                <ShieldCheck className="h-3.5 w-3.5 text-bitcoin" />
+                <span className="text-[11px] font-medium text-bitcoin">Enterprise</span>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="border-b border-border/60 bg-gradient-to-b from-bitcoin/5 to-transparent">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
-          <div className="max-w-2xl">
-            <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">
-              Bitcoin · Lightning · Multi-chain
-            </Badge>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-              Know the code behind your{" "}
-              <span
-                className="bg-clip-text text-transparent"
-                style={{ backgroundImage: "var(--gradient-bitcoin)" }}
-              >
-                wallet
-              </span>
-              .
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground sm:text-base">
-              Compare the programming languages, reproducibility, custody model and code access of
-              today's most-used crypto wallets — at a glance.
-            </p>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <section className="mb-8">
+          <p className="mb-3 text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+            Search and filter wallets
+          </p>
+
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search wallet names…"
+              className="h-11 border-white/15 bg-card/60 pl-9"
+            />
           </div>
 
-          {/* Search */}
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search wallets, companies, languages…"
-                className="h-11 pl-9"
-              />
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setMatcherOpen(true)}
-              className="h-11 border-bitcoin/40 text-bitcoin hover:bg-bitcoin/10 sm:hidden"
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Select value={region} onValueChange={(v) => setRegion(v as Region | "all")}>
+              <SelectTrigger className="h-11 border-white/15 bg-card/60">
+                <SelectValue placeholder="All regions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All regions</SelectItem>
+                {ALL_REGIONS.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {r}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={type} onValueChange={(v) => setType(v as TypeFilter)}>
+              <SelectTrigger className="h-11 border-white/15 bg-card/60">
+                <SelectValue placeholder="All types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="Wallet">Wallet</SelectItem>
+                <SelectItem value="Exchange">Exchange</SelectItem>
+                <SelectItem value="Self-custodial">Self-custodial</SelectItem>
+                <SelectItem value="Custodial">Custodial</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={platform} onValueChange={(v) => setPlatform(v as ClientType | "all")}>
+              <SelectTrigger className="h-11 border-white/15 bg-card/60">
+                <SelectValue placeholder="All platforms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All platforms</SelectItem>
+                {ALL_CLIENTS.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={() => setFinderOpen(true)}
+            className="mt-3 h-11 w-full border-bitcoin/40 text-bitcoin hover:bg-bitcoin/10 sm:w-auto"
+          >
+            <WalletIcon className="mr-1.5 h-4 w-4" /> Find your wallet
+          </Button>
+
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Building2 className="mr-1.5 h-4 w-4" /> Corporate Setup
-            </Button>
-            {activeFilterCount > 0 && (
-              <Button variant="ghost" onClick={clearAll} className="h-11 shrink-0">
-                <X className="mr-1.5 h-4 w-4" /> Clear ({activeFilterCount})
-              </Button>
-            )}
-          </div>
+              <X className="h-3.5 w-3.5" /> Clear filters
+            </button>
+          )}
 
-          {corporate && (
+          {finderCriteria && (
             <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-bitcoin/30 bg-bitcoin/5 p-3 text-xs">
-              <Building2 className="h-4 w-4 text-bitcoin" />
-              <span className="font-medium text-foreground">Corporate filter active:</span>
-              {corporate.multiSig && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">Multi-Signature</Badge>}
-              {corporate.fullyOpen && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">No paid deps</Badge>}
-              {corporate.bip39 && <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">BIP-39</Badge>}
+              <WalletIcon className="h-4 w-4 text-bitcoin" />
+              <span className="font-medium text-foreground">Find your wallet filter active</span>
+              {finderCriteria.lightning && (
+                <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">Lightning</Badge>
+              )}
+              {finderCriteria.selfCustody && (
+                <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">Self-custody</Badge>
+              )}
+              {finderCriteria.mobile && (
+                <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">Mobile</Badge>
+              )}
+              {finderCriteria.multiSig && (
+                <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">Multi-Signature</Badge>
+              )}
+              {finderCriteria.standardSeed && (
+                <Badge variant="outline" className="border-bitcoin/40 text-bitcoin">BIP-39</Badge>
+              )}
               <button
                 type="button"
-                onClick={() => setCorporate(null)}
+                onClick={() => setFinderCriteria(null)}
                 className="ml-auto text-muted-foreground hover:text-foreground"
               >
                 Remove
               </button>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Main */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
-        {/* Sidebar Filters */}
-        <aside className="mb-8 lg:mb-0">
-          <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-2">
-            <FilterGroup title="Multi-Signature & Protocols">
-              <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border/60 bg-card/40 px-3 py-2.5 backdrop-blur-sm">
-                <span className="text-xs font-medium text-foreground">Multi-Signature Only</span>
-                <Switch
-                  checked={multiSigOnly}
-                  onCheckedChange={setMultiSigOnly}
-                  aria-label="Show multi-signature wallets only"
-                />
-              </label>
-            </FilterGroup>
-
-            <FilterGroup title="Client Type">
-              <div className="flex flex-wrap gap-1.5">
-                {ALL_CLIENTS.map((c) => (
-                  <FilterChip
-                    key={c}
-                    active={clients.includes(c)}
-                    onClick={() => setClients((s) => toggle(s, c))}
-                  >
-                    {c}
-                  </FilterChip>
-                ))}
-              </div>
-            </FilterGroup>
-
-            <FilterGroup title="Repository Status">
-              <div className="flex flex-wrap gap-1.5">
-                {ALL_CODE_ACCESS.map((a) => (
-                  <FilterChip
-                    key={a}
-                    active={access.includes(a)}
-                    onClick={() => setAccess((s) => toggle(s, a))}
-                  >
-                    {a}
-                  </FilterChip>
-                ))}
-              </div>
-            </FilterGroup>
-
-            <FilterGroup title="Programming Language">
-              <div className="flex flex-wrap gap-1.5">
-                {ALL_LANGUAGES.map((l) => (
-                  <FilterChip
-                    key={l}
-                    active={langs.includes(l)}
-                    onClick={() => setLangs((s) => toggle(s, l))}
-                  >
-                    {l}
-                  </FilterChip>
-                ))}
-              </div>
-            </FilterGroup>
-          </div>
-        </aside>
-
-        {/* Grid */}
-        <section>
-          <div className="mb-4 flex items-baseline justify-between">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              {filtered.length} {filtered.length === 1 ? "wallet" : "wallets"}
-            </h3>
-          </div>
-
-          {filtered.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-card/40 p-12 text-center">
-              <p className="text-sm text-muted-foreground">
-                No wallets match your filters. Try clearing some.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((w) => (
-                <WalletCard key={w.id} wallet={w} onSelect={() => openWallet(w)} />
-              ))}
-            </div>
-          )}
         </section>
+
+        <div className="mb-4 flex items-baseline justify-between">
+          <h2 className="text-sm font-medium text-muted-foreground">
+            {filtered.length} {filtered.length === 1 ? "wallet" : "wallets"}
+          </h2>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-white/15 bg-card/40 p-12 text-center">
+            <Shield className="mx-auto h-8 w-8 text-muted-foreground" />
+            <p className="mt-3 text-sm text-muted-foreground">
+              No wallets match your filters.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((w) => (
+              <WalletCard
+                key={w.id}
+                wallet={w}
+                onSelect={() => {
+                  setSelected(w);
+                  setOpen(true);
+                }}
+              />
+            ))}
+          </div>
+        )}
       </main>
 
-      <footer className="border-t border-border/60 py-6 text-center text-xs text-muted-foreground">
-        Data is illustrative. Inspired by WalletScrutiny — verify with the source.
+      <footer className="border-t border-white/12 py-6 text-center text-xs text-muted-foreground">
+        Fraktur — illustrative data inspired by WalletScrutiny. Always verify with primary sources.
       </footer>
 
       <WalletDetail wallet={selected} open={open} onOpenChange={setOpen} />
-      <CorporateMatcher
-        open={matcherOpen}
-        onOpenChange={setMatcherOpen}
-        onApply={setCorporate}
-      />
-    </div>
-  );
-}
-
-function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-6">
-      <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </h4>
-      {children}
+      <WalletFinder open={finderOpen} onOpenChange={setFinderOpen} onApply={setFinderCriteria} />
     </div>
   );
 }

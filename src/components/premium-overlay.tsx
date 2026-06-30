@@ -1,6 +1,6 @@
 import { Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePremium } from "@/components/premium-provider";
+import { usePremium } from "@/components/auth-provider";
 
 export function PremiumOverlay({
   label = "Enterprise Premium",
@@ -33,7 +33,7 @@ export function PremiumOverlay({
             Unlock deep-dive security analysis
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Seed engines, multi-sig compliance and corporate setup guides.
+            Seed engines, multi-signature compliance and wallet finder guides.
           </p>
         </div>
         <Button
