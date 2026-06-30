@@ -2,7 +2,7 @@
 
 An interactive directory for comparing Bitcoin wallets and exchanges by programming language, custody model, protocols, multi-signature support, and historical vulnerability track records.
 
-Inspired by [WalletScrutiny](https://walletscrutiny.com/) — data is illustrative; always verify against primary sources.
+
 
 ## Features
 

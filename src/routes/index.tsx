@@ -310,7 +310,7 @@ function Index() {
       </main>
 
       <footer className="border-t border-white/12 py-6 text-center text-xs text-muted-foreground">
-        Fraktur — illustrative data inspired by WalletScrutiny. Always verify with primary sources.
+        Fraktur — Always verify with primary sources. All logos are trademarks of their respective owners.
       </footer>
 
       <WalletDetail wallet={selected} open={open} onOpenChange={setOpen} />
